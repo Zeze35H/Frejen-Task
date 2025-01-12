@@ -1,6 +1,6 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { findAllTickets, getStates } from '../utils/api'
+import { findAllTickets, getDepartments } from '../utils/api'
 import Ticket from '../interfaces/TicketInterface'
 import State from '../interfaces/StateInterface'
 import Link from 'next/link';
@@ -37,7 +37,7 @@ const HomePage: React.FC = () => {
 
   const fetchStateFilters = async () => {
     try {
-      const response = await getStates();
+      const response = await getDepartments();
       setStateFilters(response.data);
     } catch (err) {
       console.error('Failed to fetch states', err);

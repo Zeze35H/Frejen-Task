@@ -69,7 +69,7 @@ db.sequelize.sync({ force: true }).then(() => {
         { id: 2, name: 'Bob Smith', email: 'bob@example.com', password: '$2b$10$8NvUNHFay6THXQGLlHtMo.SAFIDiJ/./mMzISZmpqib/.kbdITjke', id_department: 2, admin: false },
         { id: 3, name: 'Charlie Davis', email: 'charlie@example.com', password: '$2b$10$8NvUNHFay6THXQGLlHtMo.SAFIDiJ/./mMzISZmpqib/.kbdITjke', id_department: 3, admin: true },
         { id: 4, name: 'Dana White', email: 'dana@example.com', password: '$2b$10$8NvUNHFay6THXQGLlHtMo.SAFIDiJ/./mMzISZmpqib/.kbdITjke', id_department: 4, admin: false },
-        { id: 5, name: 'José Henriques', email: 'je.henriques35@gmail.com', password: '$2b$10$8NvUNHFay6THXQGLlHtMo.SAFIDiJ/./mMzISZmpqib/.kbdITjke', id_department: 1, admin: true },
+        { id: 5, name: 'José Henriques', email: 'je.henriques35@gmail.com', password: '$2b$10$8NvUNHFay6THXQGLlHtMo.SAFIDiJ/./mMzISZmpqib/.kbdITjke', id_department: 4, admin: true },
     ];
 
     const tickets = [
@@ -135,6 +135,8 @@ app.use(passport.session());
 
 require("./routes/ticket.routes.js")(app);
 require("./routes/state.routes.js")(app);
+require("./routes/department.routes.js")(app);
+require("./routes/user.routes.js")(app);
 require("./routes/auth.routes.js")(app, passport, db);
 
 

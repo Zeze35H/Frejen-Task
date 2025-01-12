@@ -4,38 +4,6 @@ import http from "./http-common.js";
 //                                      AUTH                                                
 // ======================================================================================
 
-// export const login = async (data, withCredentials) => {
-//     try {
-//         const requestOptions = {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//             body: JSON.stringify({ data: data, withCredentials: withCredentials })
-//         };
-//         console.log("asd")
-//         const response = await fetch("http://localhost:8000/api/auth/login/", requestOptions);
-//         if (!response.ok) throw new Error(`Error: ${response.status}`);
-//         return await response.json();
-//     } catch (error) {
-//         console.error("Error fetching projects:", error);
-//         throw error;
-//     }
-// };
-
-// export const logout = async () => {
-//     try {
-//         const requestOptions = {
-//             method: 'POST',
-//             headers: { 'Content-Type': 'application/json' },
-//         };
-//         const response = await fetch(`http://localhost:8000/api/auth/logout`, requestOptions);
-//         if (!response.ok) throw new Error(`Error: ${response.status}`);
-//         return await response.json();
-//     } catch (error) {
-//         console.error("Error fetching project info:", error);
-//         throw error;
-//     }
-// };
-
 export const login = async (data, withCredentials) => {
     console.log("inside api.js login()")
     return http.post(`/auth/login`, data, withCredentials);
@@ -44,6 +12,11 @@ export const login = async (data, withCredentials) => {
 export const logout = async () => {
     console.log("inside api.js logout()")
     return http.post(`/auth/logout`);
+}
+
+export const isAuthenticated = async () => {
+    console.log("inside api.js isAuthenticated()")
+    return http.get(`/auth/checkAuth`);
 }
 
 // ======================================================================================
@@ -72,4 +45,29 @@ export const findAllTickets = async (data) => {
 export const getStates = async () => {
     console.log("inside api.js getStates()")
     return http.get(`/states`);
+}
+
+// ======================================================================================
+//                                     DEPARTMENTS                                                
+// ======================================================================================
+
+export const getDepartments = async () => {
+    console.log("inside api.js getDepartments()")
+    return http.get(`/departments`);
+}
+
+// ======================================================================================
+//                                     USER                                                
+// ======================================================================================
+
+export const findOneUser = async (id) => {
+    console.log("inside api.js findOneUser()")
+    return http.get(`/users/${id}`);
+}
+
+export const updateUser = async (id, data) => {
+    console.log(id)
+    console.log(data)
+    console.log("inside api.js updateUser()")
+    return http.post(`/users/update/${id}`, data);
 }
