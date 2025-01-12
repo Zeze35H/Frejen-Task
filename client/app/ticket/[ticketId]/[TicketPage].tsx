@@ -1,4 +1,4 @@
-import Ticket from "../../components/clinetComponents/Ticket"
+import TicketClient from "../../components/clinetComponents/Ticket"
 import { findOneTicket } from '../../utils/api'
 
 const TicketPage = async ({ params }: { params: { ticketId: string } }) => {
@@ -7,9 +7,9 @@ const TicketPage = async ({ params }: { params: { ticketId: string } }) => {
 
     try {
         const response = await findOneTicket(ticketId);
-        console.log(response)
+        console.log(response.data)
         if (response.data)
-            return <Ticket ticket={response.data} />
+            return <TicketClient ticket={response.data} />
         else
             return <h1 className="text-center mt-6">No ticket found</h1>
     } catch (err) {

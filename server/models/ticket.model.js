@@ -10,7 +10,7 @@ module.exports = (sequelize, Sequelize, User, Department, State) => {
       allowNull: false,
     },
     description: {
-      type: Sequelize.TEXT,
+      type: Sequelize.STRING,
       allowNull: false,
     },
     created_at: {
@@ -50,6 +50,10 @@ module.exports = (sequelize, Sequelize, User, Department, State) => {
         model: Department,
         key: 'id',
       },
+    },
+    observations: {
+      type: Sequelize.STRING,
+      allowNull: true,
     },
   }, { timestamps: false });
 };

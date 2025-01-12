@@ -2,6 +2,7 @@ const db = require("../models");
 const Op = db.Sequelize.Op
 
 const Ticket = db.Ticket
+const User = db.User
 const State = db.State
 const Department = db.Department
 
@@ -31,7 +32,14 @@ exports.findOne = (req, res) => {
     console.log("inside ticket.controller.js findOne")
     const id = req.params.id;
 
-    Ticket.findByPk(id)
+    Ticket.findByPk(id, {
+        include: [
+            { model: User, as: 'creator', attributes: ['name'] },
+            { model: User, as: 'updater', attributes: ['name'] },
+            { model: State, as: 'state', attributes: ['title'] },
+            { model: Department, as: 'department', attributes: ['title'] },
+        ],
+    })
         .then(data => {
             if (data) {
                 res.send(data);
