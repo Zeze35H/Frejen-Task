@@ -6,19 +6,21 @@ import { useRouter } from "next/navigation";
 import State from "@/app/interfaces/StateInterface";
 import UserInterface from "@/app/interfaces/UserInterface";
 
-
 const TicketClient = ({ ticket }: { ticket: Ticket }) => {
     const router = useRouter();
-    const [user, setUser] = useState<UserInterface|null>(null);
+    const [user, setUser] = useState<UserInterface | null>(null);
     const [state, setState] = useState(ticket.id_state);
     const [states, setStates] = useState<State[]>([]);
     const [authorization, setAuthorization] = useState(false);
     const [observations, setObservations] = useState("");
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
+
 
     useEffect(() => {
         const fetchProfile = async () => {
+            setLoading(true);
             try {
                 const response = await isAuthenticated();
                 if (response.data.authenticated) {
@@ -36,6 +38,9 @@ const TicketClient = ({ ticket }: { ticket: Ticket }) => {
                 }
             } catch (err) {
                 console.error(err);
+            }
+            finally {
+                setLoading(false)
             }
         };
 
@@ -58,12 +63,14 @@ const TicketClient = ({ ticket }: { ticket: Ticket }) => {
 
     const handleUpdateTicket = async (e: React.FormEvent) => {
         e.preventDefault()
+        setLoading(true);
         setSuccessMessage(null);
         setErrorMessage(null);
         console.log(state)
         console.log(observations)
-        if (!user || [2, 4].includes(state) && !observations.trim()) {
-            setErrorMessage("Observations are required when rejecting or completing a ticket.")
+        if (!user || [2].includes(state) && !observations.trim()) {
+            setErrorMessage("Observations are required when rejecting a ticket.")
+            setLoading(false);
             return;
         }
 
@@ -87,20 +94,23 @@ const TicketClient = ({ ticket }: { ticket: Ticket }) => {
             console.error(err);
             setErrorMessage('Failed to update ticket.');
         }
+        finally {
+            setLoading(false)
+        }
     };
 
 
     return (
-        <>
-            {!authorization ? (
+        <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
+            <h1 className="text-gray-900 text-2xl font-bold mb-4">Ticket Details</h1>
+            {loading && <p className=" text-gray-500 text-center mb-4">Loading...</p>}
+            {!loading && !authorization &&
                 <h1 className="text-red-600 text-md font-bold text-center mt-6">
-                    Insufficient authorization to view ticket
+                    Insufficient authorization to view ticket.
                 </h1>
-            ) : (
-                <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
-                    <h1 className="text-gray-900 text-2xl font-bold mb-4">
-                        Ticket Details
-                    </h1>
+            }
+            {!loading && authorization &&
+                <>
                     <div className="mb-4">
                         <h2 className="text-gray-800 text-lg font-bold">{ticket.title}</h2>
                         <p className="text-sm text-gray-500">
@@ -175,11 +185,9 @@ const TicketClient = ({ ticket }: { ticket: Ticket }) => {
                             </div>
                         )
                     }
-
-
-                </div>
-            )}
-        </>
+                </>
+            }
+        </div>
     );
 };
 

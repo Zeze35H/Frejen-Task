@@ -1,6 +1,7 @@
 import Nav from "@/app/components/clientComponents/Nav";
 import TicketClient from "../../components/clientComponents/Ticket"
 import { findOneTicket } from '../../utils/api'
+import axios from "axios";
 
 const TicketPage = async ({ params }: { params: { ticketId: string } }) => {
     const resolvedParams = await params; // Await the Promise
@@ -15,10 +16,8 @@ const TicketPage = async ({ params }: { params: { ticketId: string } }) => {
             ticket = response.data
     } catch (err) {
         console.error(err)
-        if(err.status == 404)
-        {
+        if(axios.isAxiosError(err) && err.response?.status === 404)
             error = "Ticket not found"
-        }
     }
 
     return (

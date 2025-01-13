@@ -15,13 +15,12 @@ const HomePage: React.FC = () => {
   const [newTickets, setNewTickets] = useState<Ticket[]>([]);
   const [filters, setFilters] = useState({ text: '', states: [] as number[] });
   const [stateFilters, setStateFilters] = useState<State[]>([]);
-  const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(true);
 
   const pagination_limit = 4
 
   const fetchTickets = async () => {
-    console.log("fetch tickets!")
     setLoading(true);
     try {
       const response = await isAuthenticated();
