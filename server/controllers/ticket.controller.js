@@ -122,10 +122,7 @@ exports.getTickets = (req, res) => {
 
         Ticket.findAll(options)
             .then(data => {
-                res.send({
-                    tickets: data,
-                    pagination: { page, limit }
-                });
+                res.send(data);
             })
             .catch(err => {
                 res.status(500).send({ message: err.message || "Some error occurred while retrieving all tickets." });

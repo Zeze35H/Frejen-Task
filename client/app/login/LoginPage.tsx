@@ -1,6 +1,6 @@
 "use client"
-import React, { useState } from 'react';
-import { login } from '../utils/api';
+import React, { useEffect, useState } from 'react';
+import { isAuthenticated, login } from '../utils/api';
 import { useRouter } from 'next/navigation'
 
 const LoginPage: React.FC = () => {
@@ -9,6 +9,23 @@ const LoginPage: React.FC = () => {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+
+      try {
+        const response = await isAuthenticated();
+        console.log(response.data)
+        if (response.data.authenticated) {
+          router.replace("/homepage")
+        }
+      } catch (err) {
+        console.error(err)
+      }
+    };
+
+    fetchProfile();
+  }, []);
 
   const handleLogin = async (e: React.FormEvent) => {
     setError(null)

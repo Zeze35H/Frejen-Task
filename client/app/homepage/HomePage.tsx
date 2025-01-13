@@ -12,16 +12,19 @@ const HomePage: React.FC = () => {
   const router = useRouter()
 
   const [tickets, setTickets] = useState<Ticket[]>([]);
+  const [newTickets, setNewTickets] = useState<Ticket[]>([]);
   const [filters, setFilters] = useState({ text: '', states: [] as number[] });
   const [stateFilters, setStateFilters] = useState<State[]>([]);
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
+  const pagination_limit = 6
+
   const fetchTickets = async () => {
+    console.log("fetch tickets!")
     setLoading(true);
     try {
       const response = await isAuthenticated();
-      console.log(response.data)
       if (response.data.authenticated) {
         const data = {
           id_user: response.data.user.id,
@@ -30,26 +33,27 @@ const HomePage: React.FC = () => {
           text: filters.text,
           states: filters.states,
           page: page,
-          limit: 10
+          limit: pagination_limit,
         }
-        console.log(data)
-        try {
-          const response = await findAllTickets(data);
-          console.log(response.data)
-          setTickets((prev) => [...prev, ...response.data.tickets]);
-        } catch (err) {
-          console.error('Failed to fetch tickets', err);
-        } finally {
-          setLoading(false);
+        console.log(data.page)
+        console.log(data.states)
+        const ticketResponse = await findAllTickets(data);
+        setNewTickets(ticketResponse.data)
+        if (page === 1) {
+          setTickets(ticketResponse.data); // Reset tickets on page 1
+        } else {
+          const seen = new Set(tickets.map((ticket) => ticket.id));
+          setTickets([...tickets, ...ticketResponse.data.filter((ticket: Ticket) => !seen.has(ticket.id))])
+          // setTickets((prev) => [...prev, ...ticketResponse.data]); // Append on subsequent pages
         }
-
       }
       else {
         router.replace("/login")
       }
-
     } catch (err) {
       console.error(err)
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -68,7 +72,7 @@ const HomePage: React.FC = () => {
 
   useEffect(() => {
     setTickets([]); // Reset tickets when filters change
-    setPage(1);
+    setPage(1); // Reset pagination
     fetchTickets();
   }, [filters]);
 
@@ -77,7 +81,9 @@ const HomePage: React.FC = () => {
   };
 
   useEffect(() => {
-    if (page > 1) fetchTickets();
+    if (page > 1) {
+      fetchTickets();
+    }
   }, [page]);
 
   return (
@@ -86,18 +92,21 @@ const HomePage: React.FC = () => {
       <div className="min-h-screen bg-gray-100 p-6">
         <div className="max-w-4xl mx-auto bg-white p-6 rounded shadow">
           <h1 className="text-2xl font-bold mb-6 text-gray-800">Ticket List</h1>
-          <div className="mb-4">
+          <div className="text-gray-600 mb-4">
             <input
               type="text"
               placeholder="Search by title or description"
               value={filters.text}
-              onChange={(e) => setFilters({ ...filters, text: e.target.value })}
+              onChange={(e) => {
+                setFilters({ ...filters, text: e.target.value })
+                setPage(1)
+              }}
               className="w-full p-2 border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
             />
           </div>
           <div className="mb-4">
             <label className="block text-sm font-medium text-gray-700 mb-2">Filter by State</label>
-            <div className="flex flex-wrap gap-2">
+            <div className="text-gray-600 flex flex-wrap gap-2">
               {stateFilters.map((state) => (
                 <label key={state.id} className="flex items-center space-x-2">
                   <input
@@ -108,6 +117,7 @@ const HomePage: React.FC = () => {
                         ? [...filters.states, state.id]
                         : filters.states.filter((id) => id !== state.id);
                       setFilters({ ...filters, states: newStates });
+                      setPage(1);
                     }}
                   />
                   <span>{state.title}</span>
@@ -135,7 +145,11 @@ const HomePage: React.FC = () => {
             {!loading && tickets.length > 0 && (
               <button
                 onClick={handleLoadMore}
-                className="mt-4 w-full bg-blue-600 text-white font-bold py-2 px-4 rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                disabled={loading || tickets.length % pagination_limit === 0 || newTickets.length === 0}
+                className={`mt-4 w-full font-bold py-2 px-4 rounded focus:outline-none ${loading || tickets.length % pagination_limit === 0 || newTickets.length === 0
+                  ? "bg-gray-400 cursor-not-allowed"
+                  : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
+                  }`}
               >
                 Load More
               </button>
