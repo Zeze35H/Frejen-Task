@@ -18,7 +18,7 @@ const HomePage: React.FC = () => {
   const [loading, setLoading] = useState(false);
   const [page, setPage] = useState(1);
 
-  const pagination_limit = 6
+  const pagination_limit = 4
 
   const fetchTickets = async () => {
     console.log("fetch tickets!")
@@ -35,14 +35,17 @@ const HomePage: React.FC = () => {
           page: page,
           limit: pagination_limit,
         }
-        console.log(data.page)
-        console.log(data.states)
+
+        console.log(data)
         const ticketResponse = await findAllTickets(data);
         setNewTickets(ticketResponse.data)
         if (page === 1) {
+          console.log(ticketResponse.data)
+
           setTickets(ticketResponse.data); // Reset tickets on page 1
         } else {
           const seen = new Set(tickets.map((ticket) => ticket.id));
+          console.log([...tickets, ...ticketResponse.data.filter((ticket: Ticket) => !seen.has(ticket.id))])
           setTickets([...tickets, ...ticketResponse.data.filter((ticket: Ticket) => !seen.has(ticket.id))])
           // setTickets((prev) => [...prev, ...ticketResponse.data]); // Append on subsequent pages
         }
@@ -145,8 +148,8 @@ const HomePage: React.FC = () => {
             {!loading && tickets.length > 0 && (
               <button
                 onClick={handleLoadMore}
-                disabled={loading || tickets.length % pagination_limit === 0 || newTickets.length === 0}
-                className={`mt-4 w-full font-bold py-2 px-4 rounded focus:outline-none ${loading || tickets.length % pagination_limit === 0 || newTickets.length === 0
+                disabled={loading ||  newTickets.length < pagination_limit}
+                className={`mt-4 w-full font-bold py-2 px-4 rounded focus:outline-none ${loading || newTickets.length < pagination_limit
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-blue-600 text-white hover:bg-blue-700 focus:ring-2 focus:ring-blue-500"
                   }`}
