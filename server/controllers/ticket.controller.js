@@ -12,9 +12,9 @@ exports.create = (req, res) => {
     Ticket.create({
         title: req.body.title,
         description: req.body.description,
-        id_department: req.body.id_department,
-        created_by: req.user.id,
-        updated_by: req.user.id,
+        id_department: req.body.department,
+        created_by: req.body.id,
+        updated_by: req.body.id,
         id_state: 1, // Default to "Pending"
         created_at: new Date(),
         updated_at: new Date(),
@@ -77,32 +77,40 @@ exports.findOne = (req, res) => {
 exports.getTickets = (req, res) => {
     console.log("inside ticket.controller.js getTickets")
 
-    const { id_department, admin, text, states, page = 1, limit = 2 } = req.body; // Filters and pagination
+    const { id_user, id_department, admin, text, states, page = 1, limit = 2 } = req.body; // Filters and pagination
 
     try {
-        let conditions = {};
+        const conditions = [];
 
+        // Add department and creator filter for non-admin users
         if (!admin) {
-            // Non-admin users can only see tickets from their department
-            console.log("here")
-            conditions.id_department = id_department;
+            conditions.push({
+                [Op.or]: [
+                    { id_department: id_department },
+                    { created_by: id_user },
+                ],
+            });
         }
 
-        // Filter by states if provided
-        if (states && states.length > 0) {
-            conditions.id_state = states; // Assumes states is an array of IDs
-        }
-
-        // Text search on title or description
+        // Add text search filter
         if (text) {
-            conditions[Op.or] = [
-                { title: { [Op.like]: `%${text}%` } },
-                { description: { [Op.like]: `%${text}%` } }
-            ];
+            conditions.push({
+                [Op.or]: [
+                    { title: { [Op.like]: `%${text}%` } },
+                    { description: { [Op.like]: `%${text}%` } },
+                ],
+            });
+        }
+
+        // Add state filter if provided
+        if (states && states.length > 0) {
+            conditions.push({
+                id_state: states,
+            });
         }
 
         const options = {
-            where: conditions,
+            where: { [Op.and]: conditions },
             include: [
                 { model: State, as: 'state', attributes: ['title'] },
                 { model: Department, as: 'department', attributes: ['title'] },
@@ -126,4 +134,63 @@ exports.getTickets = (req, res) => {
         console.error('Error fetching tickets:', error);
         res.status(500).json({ message: 'Failed to fetch tickets' });
     }
+};
+
+exports.update = (req, res) => {
+    const id = req.params.id;
+
+    Ticket.findByPk(id)
+        .then(data => {
+            if (data) {
+                if ([2, 4].includes(data.id_state)) {
+                    res.send({
+                        success: false,
+                        message: `Cannot update Ticket with id ${id}. It is already rejected or completed.`,
+                    });
+                }
+                else {
+
+                    let new_data = {
+                        id_state: req.body.id_state,
+                        updated_at: new Date(),
+                        updated_by: req.body.id_user,
+                        observations: req.body.observations
+                    };
+
+                    Ticket.update(new_data, {
+                        where: { id: id },
+                    })
+                        .then((num) => {
+                            if (num == 1) {
+                                res.send({
+                                    success: true,
+                                    message: "Ticket was updated successfully!",
+                                });
+                            } else {
+                                res.send({
+                                    success: false,
+                                    message: `Cannot update Ticket with id ${id}.`,
+                                });
+                            }
+                        })
+                        .catch((err) => {
+                            res.status(500).send({
+                                success: false,
+                                message: `Error updating Ticket with id ${id}. ${err}`,
+                            });
+                        });
+                }
+            }
+            else {
+                res.status(404).send({
+                    message: `Cannot find Ticket with id=${id}.`
+                });
+            }
+        })
+        .catch(err => {
+            res.status(500).send({
+                message: `Error retrieving Ticket with id=${id}. ${err}`,
+            });
+        });
+
 };

@@ -12,6 +12,9 @@ module.exports = app => {
     // Get all tickets
     router.post("/findAll", ticket.getTickets);
 
+    // Get all tickets
+    router.post("/update/:id", ticket.update);
+
 
     app.use('/api/tickets', router);
 };

@@ -1,21 +1,36 @@
-import TicketClient from "../../components/clinetComponents/Ticket"
+import Nav from "@/app/components/clientComponents/Nav";
+import TicketClient from "../../components/clientComponents/Ticket"
 import { findOneTicket } from '../../utils/api'
 
 const TicketPage = async ({ params }: { params: { ticketId: string } }) => {
     const resolvedParams = await params; // Await the Promise
     const { ticketId } = resolvedParams;
 
+    let ticket = null;
+    let error = "An error has occurred"
+
     try {
         const response = await findOneTicket(ticketId);
-        console.log(response.data)
         if (response.data)
-            return <TicketClient ticket={response.data} />
-        else
-            return <h1 className="text-center mt-6">No ticket found</h1>
+            ticket = response.data
     } catch (err) {
         console.error(err)
-        return <h1 className="text-center mt-6 text-red-500">An error has occurred</h1>
+        if(err.status == 404)
+        {
+            error = "Ticket not found"
+        }
     }
+
+    return (
+        <>
+            <Nav />
+            <div className="min-h-screen bg-gray-100 p-6">
+                {
+                    ticket ? <TicketClient ticket={ticket} /> : <h1 className="text-red-600 text-md font-bold text-center mt-6 ">{error}</h1>
+                }
+            </div>
+        </>
+    )
 
 };
 

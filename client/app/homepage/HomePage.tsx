@@ -1,12 +1,16 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { findAllTickets, getDepartments } from '../utils/api'
+import { findAllTickets, getStates, isAuthenticated } from '../utils/api'
 import Ticket from '../interfaces/TicketInterface'
 import State from '../interfaces/StateInterface'
 import Link from 'next/link';
-import Nav from '../components/clinetComponents/Nav';
+import Nav from '../components/clientComponents/Nav';
+import { useRouter } from 'next/navigation';
 
 const HomePage: React.FC = () => {
+
+  const router = useRouter()
+
   const [tickets, setTickets] = useState<Ticket[]>([]);
   const [filters, setFilters] = useState({ text: '', states: [] as number[] });
   const [stateFilters, setStateFilters] = useState<State[]>([]);
@@ -16,28 +20,42 @@ const HomePage: React.FC = () => {
   const fetchTickets = async () => {
     setLoading(true);
     try {
-      // const response = await findAllTickets({ ...filters, page });
-      const data = {
-        id_department: 1,
-        admin: true,
-        text: filters.text,
-        states: filters.states,
-        page: page,
-        limit: 4
-      }
-      const response = await findAllTickets(data);
+      const response = await isAuthenticated();
       console.log(response.data)
-      setTickets((prev) => [...prev, ...response.data.tickets]);
+      if (response.data.authenticated) {
+        const data = {
+          id_user: response.data.user.id,
+          id_department: response.data.user.id_department,
+          admin: response.data.user.admin,
+          text: filters.text,
+          states: filters.states,
+          page: page,
+          limit: 10
+        }
+        console.log(data)
+        try {
+          const response = await findAllTickets(data);
+          console.log(response.data)
+          setTickets((prev) => [...prev, ...response.data.tickets]);
+        } catch (err) {
+          console.error('Failed to fetch tickets', err);
+        } finally {
+          setLoading(false);
+        }
+
+      }
+      else {
+        router.replace("/login")
+      }
+
     } catch (err) {
-      console.error('Failed to fetch tickets', err);
-    } finally {
-      setLoading(false);
+      console.error(err)
     }
   };
 
   const fetchStateFilters = async () => {
     try {
-      const response = await getDepartments();
+      const response = await getStates();
       setStateFilters(response.data);
     } catch (err) {
       console.error('Failed to fetch states', err);

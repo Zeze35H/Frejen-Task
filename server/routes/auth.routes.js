@@ -14,8 +14,6 @@ module.exports = (app, passport, db) => {
             db.User.findOne({ where: { email: email } })
                 .then(user => {
 
-                    console.log("found user", user)
-
                     if (!user) {
                         return done(null, false, { message: 'Email or Password Incorrect.' });
                     }
@@ -59,12 +57,7 @@ module.exports = (app, passport, db) => {
     });
 
     router.post('/login', (req, res, next) => {
-        console.log(req.body)
-        console.log("inside login!")
         passport.authenticate('local', (err, user, info) => {
-            console.log(err)
-            console.log(user)
-            console.log(info)
             if (err) {
                 return next(err);
             }

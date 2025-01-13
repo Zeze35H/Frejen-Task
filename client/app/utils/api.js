@@ -16,7 +16,7 @@ export const logout = async () => {
 
 export const isAuthenticated = async () => {
     console.log("inside api.js isAuthenticated()")
-    return http.get(`/auth/checkAuth`);
+    return http.get(`/auth/checkAuth`, { withCredentials: true });
 }
 
 // ======================================================================================
@@ -36,6 +36,11 @@ export const findOneTicket = async (id) => {
 export const findAllTickets = async (data) => {
     console.log("inside api.js findAllTickets()")
     return http.post(`/tickets/findAll`, data);
+}
+
+export const updateTicket = async (id, data) => {
+    console.log("inside api.js updateTicket()")
+    return http.post(`/tickets/update/${id}`, data);
 }
 
 // ======================================================================================
@@ -66,8 +71,6 @@ export const findOneUser = async (id) => {
 }
 
 export const updateUser = async (id, data) => {
-    console.log(id)
-    console.log(data)
     console.log("inside api.js updateUser()")
     return http.post(`/users/update/${id}`, data);
 }

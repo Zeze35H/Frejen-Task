@@ -21,7 +21,7 @@ const LoginPage: React.FC = () => {
       const response = await login(userData, { withCredentials: true })
       console.log('Login response:', response.data);
       if (response.data.success) {
-        router.push("/homepage")
+        router.replace("/homepage")
       }
       else {
         setError(response.data.message)
