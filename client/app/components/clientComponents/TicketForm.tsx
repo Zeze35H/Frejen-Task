@@ -1,54 +1,63 @@
 "use client"
 import React, { useState, useEffect } from 'react';
-import { getDepartments, updateUser } from '../../utils/api'
-import DepartmentInterface from '../../interfaces/DepartmentInterface'
+import { getDepartments, createTicket } from "../../utils/api"
+import DepartmentInterface from '../../interfaces/DepartmentInterface';
 import Nav from '../../components/clientComponents/Nav';
 
 type Props = {
     id_user: number,
-    user_name: string;
-    id_department: number,
-  };
+};
 
-const Profile: React.FC<Props> = ({id_user, user_name, id_department}:Props) => {
+const TicketForm: React.FC<Props> = ({ id_user}: Props) => {
 
-    const [name, setName] = useState(user_name || '');
-    const [password, setPassword] = useState('');
-    const [department, setDepartment] = useState(id_department || '');
+    const [title, setTitle] = useState('');
+    const [description, setDescription] = useState('');
+    const [department, setDepartment] = useState('');
     const [departments, setDepartments] = useState<DepartmentInterface[]>([]);
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
-
-    const fetchDepartments = async () => {
-        setLoading(true)
-        try {
-            const response = await getDepartments();
-            setDepartments(response.data);
-        } catch {
-            setErrorMessage('Failed to load departments.');
-        } finally {
-            setLoading(false)
-        }
-    };
-
     useEffect(() => {
+        const fetchDepartments = async () => {
+            setLoading(true);
+            try {
+                const response = await getDepartments();
+                setDepartments(response.data);
+            } catch (err) {
+                console.error(err)
+                setErrorMessage('Failed to load departments.');
+            }
+            finally {
+                setLoading(false)
+            }
+        };
+
         fetchDepartments();
     }, []);
 
-    const handleUpdate = async (e: React.FormEvent) => {
+    const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setLoading(true)
         setSuccessMessage(null);
         setErrorMessage(null);
 
+        if (!title || !description || !department) {
+            setErrorMessage('All fields are required.');
+            return;
+        }
+
         try {
-            await updateUser(id_user, { name, password, department });
-            setSuccessMessage('Profile updated successfully.');
+            console.log({ id_user, title, description, department })
+            const response = await createTicket({ id_user, title, description, department });
+            console.log(response)
+            setSuccessMessage('Ticket created successfully.');
+            setTitle('');
+            setDescription('');
+            setDepartment('');
         } catch (err) {
             console.error(err)
-            setErrorMessage('Failed to update profile.');
+            setErrorMessage('Failed to create ticket.');
         }
         finally {
             setLoading(false)
@@ -60,36 +69,38 @@ const Profile: React.FC<Props> = ({id_user, user_name, id_department}:Props) => 
             <Nav />
             <div className="min-h-screen flex items-center justify-center bg-gray-100">
                 <div className="w-full max-w-lg bg-white p-8 rounded shadow">
-                    <h2 className="text-gray-800 text-2xl font-bold mb-6">Profile</h2>
+
+                    <h2 className="text-gray-800 text-2xl font-bold mb-6">Create Ticket</h2>
                     {loading && <p className=" text-gray-500 text-center mb-4">Loading...</p>}
                     {!loading &&
                         <>
-                            {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
-                            {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
-                            <form onSubmit={handleUpdate}>
+                            {successMessage && <p className="text-green-500 text-center mb-4">{successMessage}</p>}
+                            {errorMessage && <p className="text-red-500 text-center mb-4">{errorMessage}</p>}
+                            <form onSubmit={handleSubmit}>
                                 <div className="mb-4">
-                                    <label htmlFor="name" className="block text-sm font-medium text-gray-700">
-                                        Name
+                                    <label htmlFor="title" className="block text-sm font-medium text-gray-700">
+                                        Title
                                     </label>
                                     <input
                                         type="text"
-                                        id="name"
-                                        value={name}
-                                        onChange={(e) => setName(e.target.value)}
+                                        id="title"
+                                        value={title}
+                                        onChange={(e) => setTitle(e.target.value)}
                                         required
                                         className="text-gray-700 mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     />
                                 </div>
                                 <div className="mb-4">
-                                    <label htmlFor="password" className="block text-sm font-medium text-gray-700">
-                                        Password
+                                    <label htmlFor="description" className="block text-sm font-medium text-gray-700">
+                                        Description
                                     </label>
-                                    <input
-                                        type="password"
-                                        id="password"
-                                        value={password}
-                                        onChange={(e) => setPassword(e.target.value)}
+                                    <textarea
+                                        id="description"
+                                        value={description}
+                                        onChange={(e) => setDescription(e.target.value)}
+                                        required
                                         className="text-gray-700 mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
+                                        rows={4}
                                     />
                                 </div>
                                 <div className="mb-6">
@@ -103,6 +114,9 @@ const Profile: React.FC<Props> = ({id_user, user_name, id_department}:Props) => 
                                         required
                                         className="text-gray-700 mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
                                     >
+                                        <option value="" disabled>
+                                            Select a department
+                                        </option>
                                         {departments.map((dep) => (
                                             <option key={dep.id} value={dep.id}>
                                                 {dep.title}
@@ -114,11 +128,12 @@ const Profile: React.FC<Props> = ({id_user, user_name, id_department}:Props) => 
                                     type="submit"
                                     className="w-full py-2 px-4 bg-blue-600 text-white font-bold rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500"
                                 >
-                                    Update Profile
+                                    Create Ticket
                                 </button>
                             </form>
                         </>
                     }
+
                 </div>
             </div>
         </>
@@ -126,4 +141,4 @@ const Profile: React.FC<Props> = ({id_user, user_name, id_department}:Props) => 
     );
 };
 
-export default Profile;
+export default TicketForm;

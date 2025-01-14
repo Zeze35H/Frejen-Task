@@ -14,10 +14,6 @@ export const logout = async () => {
     return http.post(`/auth/logout`);
 }
 
-export const isAuthenticated = async () => {
-    console.log("inside api.js isAuthenticated()")
-    return http.get(`/auth/checkAuth`, { withCredentials: true });
-}
 
 // ======================================================================================
 //                                     TICKETS                                                

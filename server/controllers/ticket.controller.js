@@ -13,8 +13,8 @@ exports.create = (req, res) => {
         title: req.body.title,
         description: req.body.description,
         id_department: req.body.department,
-        created_by: req.body.id,
-        updated_by: req.body.id,
+        created_by: req.body.id_user,
+        updated_by: req.body.id_user,
         id_state: 1, // Default to "Pending"
         created_at: new Date(),
         updated_at: new Date(),
@@ -55,24 +55,6 @@ exports.findOne = (req, res) => {
             });
         });
 };
-
-// exports.findAll = (req, res) => {
-//     console.log("inside ticket.controller.js find")
-
-//     Ticket.findAll({
-//         include: [
-//             { model: State, as: 'state', attributes: ['title'] },
-//             { model: Department, as: 'department', attributes: ['title'] },
-//         ],
-//         order: [['updated_at', 'DESC']],
-//     })
-//         .then(data => {
-//             res.send(data);
-//         })
-//         .catch(err => {
-//             res.status(500).send({ message: err.message || "Some error occurred while retrieving all tickets." });
-//         });
-// }
 
 exports.getTickets = (req, res) => {
     console.log("inside ticket.controller.js getTickets")

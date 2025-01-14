@@ -1,58 +1,39 @@
 "use client";
 import { useEffect, useState } from "react";
 import Ticket from "../../interfaces/TicketInterface";
-import { getStates, isAuthenticated, updateTicket } from "@/app/utils/api";
-import { useRouter } from "next/navigation";
+import { getStates, updateTicket } from "@/app/utils/api";
 import State from "@/app/interfaces/StateInterface";
-import UserInterface from "@/app/interfaces/UserInterface";
+import { useRouter } from "next/navigation";
 
-const TicketClient = ({ ticket }: { ticket: Ticket }) => {
-    const router = useRouter();
-    const [user, setUser] = useState<UserInterface | null>(null);
+type Props = {
+    id_user: number,
+    id_department: number,
+    admin: boolean;
+};
+
+const TicketClient: React.FC<{ user: Props, ticket: Ticket }> = ({ user, ticket }: { user: Props, ticket: Ticket }) => {
+
+    const router = useRouter()
+    const authorization = user.admin || user.id_user === ticket.created_by || user.id_department === ticket.id_department;
+
     const [state, setState] = useState(ticket.id_state);
     const [states, setStates] = useState<State[]>([]);
-    const [authorization, setAuthorization] = useState(false);
     const [observations, setObservations] = useState("");
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
 
 
-    useEffect(() => {
-        const fetchProfile = async () => {
-            setLoading(true);
-            try {
-                const response = await isAuthenticated();
-                if (response.data.authenticated) {
-                    const user = response.data.user;
-                    if (
-                        user.admin ||
-                        user.id === ticket.created_by ||
-                        user.id_department === ticket.id_department
-                    ) {
-                        setUser(user)
-                        setAuthorization(true);
-                    }
-                } else {
-                    router.replace("/login");
-                }
-            } catch (err) {
-                console.error(err);
-            }
-            finally {
-                setLoading(false)
-            }
-        };
-
-        fetchProfile();
-    }, []);
-
     const fetchStates = async () => {
+        setLoading(true)
         try {
             const response = await getStates();
             setStates(response.data);
         } catch (err) {
             console.error('Failed to fetch states', err);
+        }
+        finally {
+            setLoading(false)
         }
     };
 
@@ -77,7 +58,7 @@ const TicketClient = ({ ticket }: { ticket: Ticket }) => {
         try {
             const new_data = {
                 id_state: state,
-                id_user: user.id,
+                id_user: user.id_user,
                 observations: ticket.observations ? ticket.observations + "\n" + observations : observations
 
             }
