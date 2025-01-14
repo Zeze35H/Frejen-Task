@@ -2,11 +2,12 @@
 import React, { useState, useEffect } from 'react';
 import { findAllTickets, getStates } from '../../utils/api'
 
-import Link from 'next/link';
+// import Link from 'next/link';
 import Nav from './Nav';
 
 import Ticket from '../../interfaces/TicketInterface'
 import State from '../../interfaces/StateInterface'
+import TicketCard from '../TicketCard';
 
 type Props = {
   id_user: number,
@@ -125,18 +126,7 @@ const TicketList: React.FC<Props> = ({ id_user, id_department, admin }: Props) =
           </div>
           <div className="border-t border-gray-200 mt-4 pt-4">
             {tickets.map((ticket) => (
-              <Link href={`ticket/${ticket.id}`} key={ticket.id}>
-                <div className="p-4 mb-4 border rounded hover:shadow-md">
-                  <h2 className="text-lg font-bold text-gray-600">{ticket.title}</h2>
-                  <p className="text-sm text-gray-400">
-                    Created: {new Date(ticket.created_at).toLocaleDateString()} | Updated: {new Date(ticket.updated_at).toLocaleDateString()}
-                  </p>
-                  <p className="text-sm font-bold text-gray-500">Department: <span className='font-normal'>{ticket.department.title}</span>
-                  </p>
-                  <p className="text-sm font-bold text-gray-500">State: <span className='font-normal'>{ticket.state.title}</span>
-                  </p>
-                </div>
-              </Link>
+                <TicketCard key={ticket.id} {...ticket} />
 
             ))}
             {loading && <p className="text-center text-gray-500">Loading...</p>}

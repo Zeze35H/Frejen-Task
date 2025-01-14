@@ -4,6 +4,8 @@ import Ticket from "../../interfaces/TicketInterface";
 import { getStates, updateTicket } from "@/app/utils/api";
 import State from "@/app/interfaces/StateInterface";
 import { useRouter } from "next/navigation";
+import TicketManagement from "./TicketManagement";
+import TicketDetails from "../TicketDetails";
 
 type Props = {
     id_user: number,
@@ -16,9 +18,7 @@ const TicketClient: React.FC<{ user: Props, ticket: Ticket }> = ({ user, ticket 
     const router = useRouter()
     const authorization = user.admin || user.id_user === ticket.created_by || user.id_department === ticket.id_department;
 
-    const [state, setState] = useState(ticket.id_state);
     const [states, setStates] = useState<State[]>([]);
-    const [observations, setObservations] = useState("");
     const [successMessage, setSuccessMessage] = useState<string | null>(null);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
     const [loading, setLoading] = useState(true);
@@ -42,13 +42,13 @@ const TicketClient: React.FC<{ user: Props, ticket: Ticket }> = ({ user, ticket 
     }, []);
 
 
-    const handleUpdateTicket = async (e: React.FormEvent) => {
+    const handleUpdateTicket = async (e: React.FormEvent, state: number, observations: string) => {
         e.preventDefault()
         setLoading(true);
         setSuccessMessage(null);
         setErrorMessage(null);
 
-        if (!user || [2].includes(state) && !observations.trim()) {
+        if ([2].includes(state) && !observations.trim()) {
             setErrorMessage("Observations are required when rejecting a ticket.")
             setLoading(false);
             return;
@@ -90,78 +90,20 @@ const TicketClient: React.FC<{ user: Props, ticket: Ticket }> = ({ user, ticket 
             }
             {!loading && authorization &&
                 <>
-                    <div className="mb-4">
-                        <h2 className="text-gray-800 text-lg font-bold">{ticket.title}</h2>
-                        <p className="text-sm text-gray-500">
-                            Created: {new Date(ticket.created_at).toLocaleString()} by {ticket.creator.name}
-                        </p>
-                        {ticket.updated_at && (
-                            <p className="text-sm text-gray-500">
-                                Last Updated: {new Date(ticket.updated_at).toLocaleString()} by {ticket.updater.name}
-                            </p>
-                        )}
-                    </div>
-                    <div className="mb-4">
-                        <p className="text-gray-700 text-sm font-bold">Description:</p>
-                        <p className="text-gray-600">{ticket.description}</p>
-                    </div>
-                    <div className="mb-4">
-                        <p className="text-gray-600 text-sm font-bold">
-                            Department: <span className="font-normal">{ticket.department.title}</span>
-                        </p>
-                        <p className="text-gray-600 text-sm font-bold">
-                            State: <span className="font-normal">{ticket.state.title}</span>
-                        </p>
-                    </div>
-                    {ticket.observations && (
-                        <div className="mb-4">
-                            <p className="text-gray-700 text-sm font-bold">Observations:</p>
-                            <p className="text-gray-600">{ticket.observations}</p>
-                        </div>
-                    )}
-                    {/* Ticket Management Section */}
+                    <TicketDetails {...ticket} />
                     {
+                        // Disallow Ticket Management if the ticket is already Rejected(id=2) or Completed(id=4)
                         ![2, 4].includes(ticket.id_state) && (
-                            <div className="mt-6">
-                                <h2 className="text-gray-800 text-lg font-bold mb-4">Manage Ticket</h2>
+                            <>
+                                <TicketManagement
+                                    ticket_state={ticket.id_state}
+                                    successMessage={successMessage}
+                                    errorMessage={errorMessage}
+                                    handleUpdateTicket={handleUpdateTicket}
+                                    states={states}
+                                />
+                            </>
 
-                                {successMessage && <p className="text-green-500 mb-4">{successMessage}</p>}
-                                {errorMessage && <p className="text-red-500 mb-4">{errorMessage}</p>}
-
-                                {/* Observations Field */}
-                                <form onSubmit={handleUpdateTicket}>
-                                    <textarea
-                                        value={observations}
-                                        onChange={(e) => setObservations(e.target.value)}
-                                        placeholder="Add observations here"
-                                        className="text-gray-700 mt-2 p-2 border rounded w-full"
-                                    ></textarea>
-
-                                    <div className="mb-6">
-                                        {/* Buttons for State Updates */}
-                                        <select
-                                            id="department"
-                                            value={state}
-                                            onChange={(e) => setState(parseInt(e.target.value))}
-                                            required
-                                            className="text-gray-700 mt-1 p-2 w-full border rounded focus:outline-none focus:ring-2 focus:ring-blue-500"
-                                        >
-                                            {states.map((state) => (
-                                                <option key={state.id} value={state.id}>
-                                                    {state.title}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </div>
-                                    <button
-                                        type="submit"
-                                        className="bg-blue-600 text-white px-4 py-2 rounded"
-                                    >
-                                        Update Ticket
-                                    </button>
-                                </form>
-
-                            </div>
                         )
                     }
                 </>
