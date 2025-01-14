@@ -38,17 +38,13 @@ const TicketList: React.FC<Props> = ({ id_user, id_department, admin }: Props) =
       limit: pagination_limit,
     }
 
-    console.log(data)
     try {
       const ticketResponse = await findAllTickets(data);
       setNewTickets(ticketResponse.data)
       if (page === 1) {
-        console.log(ticketResponse.data)
-
         setTickets(ticketResponse.data); // Reset tickets on page 1
       } else {
         const seen = new Set(tickets.map((ticket) => ticket.id));
-        console.log([...tickets, ...ticketResponse.data.filter((ticket: Ticket) => !seen.has(ticket.id))])
         setTickets([...tickets, ...ticketResponse.data.filter((ticket: Ticket) => !seen.has(ticket.id))])
       }
 
@@ -69,7 +65,6 @@ const TicketList: React.FC<Props> = ({ id_user, id_department, admin }: Props) =
   };
 
   useEffect(() => {
-    console.log("effect!!")
     fetchStateFilters();
   }, []);
 

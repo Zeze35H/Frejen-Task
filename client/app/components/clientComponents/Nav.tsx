@@ -13,9 +13,7 @@ const Navbar = () => {
     const handleLogout = async () => {
         try {
             const response = await logout();
-            console.log(response)
             if (response.data) {
-                console.log(response.data.message)
                 router.replace("/login")
             }
         } catch (err) {

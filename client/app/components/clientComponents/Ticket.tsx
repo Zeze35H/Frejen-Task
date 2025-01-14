@@ -47,8 +47,7 @@ const TicketClient: React.FC<{ user: Props, ticket: Ticket }> = ({ user, ticket 
         setLoading(true);
         setSuccessMessage(null);
         setErrorMessage(null);
-        console.log(state)
-        console.log(observations)
+
         if (!user || [2].includes(state) && !observations.trim()) {
             setErrorMessage("Observations are required when rejecting a ticket.")
             setLoading(false);
@@ -63,7 +62,6 @@ const TicketClient: React.FC<{ user: Props, ticket: Ticket }> = ({ user, ticket 
 
             }
             const response = await updateTicket(ticket.id, new_data);
-            console.log(response)
             if (response.data.success) {
                 setSuccessMessage(response.data.message)
                 router.refresh()

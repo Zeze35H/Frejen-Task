@@ -8,7 +8,7 @@ type Props = {
     id_user: number,
 };
 
-const TicketForm: React.FC<Props> = ({ id_user}: Props) => {
+const TicketForm: React.FC<Props> = ({ id_user }: Props) => {
 
     const [title, setTitle] = useState('');
     const [description, setDescription] = useState('');
@@ -48,13 +48,13 @@ const TicketForm: React.FC<Props> = ({ id_user}: Props) => {
         }
 
         try {
-            console.log({ id_user, title, description, department })
             const response = await createTicket({ id_user, title, description, department });
-            console.log(response)
-            setSuccessMessage('Ticket created successfully.');
-            setTitle('');
-            setDescription('');
-            setDepartment('');
+            if (response.data) {
+                setSuccessMessage('Ticket created successfully.');
+                setTitle('');
+                setDescription('');
+                setDepartment('');
+            }
         } catch (err) {
             console.error(err)
             setErrorMessage('Failed to create ticket.');

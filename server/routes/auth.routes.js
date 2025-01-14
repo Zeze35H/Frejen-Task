@@ -9,7 +9,6 @@ module.exports = (app, passport, db) => {
     passport.use(new LocalStrategy(
         { usernameField: 'email', passwordField: 'password' },
         function (email, password, done) {
-            console.log("inside local strategy")
             // Find user by email in the database
             db.User.findOne({ where: { email: email } })
                 .then(user => {
@@ -29,7 +28,6 @@ module.exports = (app, passport, db) => {
                     });
                 })
                 .catch(err => {
-                    console.log("found not user");
                     done(err)
                 });
         }
@@ -44,14 +42,12 @@ module.exports = (app, passport, db) => {
     });
 
     router.get('/success', (req, res) => {
-        console.log("auth success")
         req.session.id_user = req.user.id; // Assuming req.user contains the user after Passport authentication
         req.session.signed_in = new Date(); // Store the signed-in time
         res.send({ message: 'Login successful', user: req.user, success: true })
     });
 
     router.get('/failure', (req, res) => {
-        console.log("auth failure")
         const message = req.query.message || 'Login failed.'
         res.send({ message: message, success: false })
     });

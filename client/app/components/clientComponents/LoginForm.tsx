@@ -20,7 +20,6 @@ const LoginPage: React.FC = () => {
         password: password,
       }
       const response = await login(userData, { withCredentials: true })
-      console.log('Login response:', response.data);
       if (response.data.success) {
         router.replace("/homepage")
       }
